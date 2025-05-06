@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RdbSingletonFacade.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Project Session Coverage Report</a> &gt; <a href="index.source.html" class="el_package">edu.skidmore.cs276.project.rdb</a> &gt; <span class="el_source">RdbSingletonFacade.java</span></div><h1>RdbSingletonFacade.java</h1><pre class="source lang-java linenums">package edu.skidmore.cs276.project.rdb;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+import org.apache.log4j.Logger;
+
+/**
+ * Manages the connection and interactions with a relational database.
+ * 
+ * @author David Read
+ * @version 01.00.00
+ *
+ */
+public class RdbSingletonFacade {
+	/**
+	 * Single instance of the class
+	 */
+	private static RdbSingletonFacade instance;
+
+	/**
+	 * Logger Instance
+	 */
+<span class="nc" id="L26">	private static Logger LOGGER = Logger.getLogger(RdbSingletonFacade.class);</span>
+
+	/**
+	 * The RDB driver class name
+	 */
+	private String rdbDriverClassName;
+
+	/**
+	 * The RDB server URL
+	 */
+	private String rdbUrl;
+
+	/**
+	 * The user id to use when connecting to the RDB
+	 */
+	private String userId;
+
+	/**
+	 * The password to use when connecting to the RDB
+	 */
+	private String password;
+
+	/**
+	 * Keep track of whether a result set has been created but not yet closed
+	 */
+	private boolean hasOpenResultSet;
+
+	/**
+	 * Singleton - private constructor
+	 */
+	private RdbSingletonFacade() {
+
+	}
+
+	/**
+	 * Obtain the Singleton instance
+	 * 
+	 * @return The instance
+	 */
+	public final static synchronized RdbSingletonFacade getInstance() {
+<span class="nc bnc" id="L66" title="All 2 branches missed.">		if (instance == null) {</span>
+<span class="nc" id="L67">			instance = new RdbSingletonFacade();</span>
+		}
+
+<span class="nc" id="L70">		return instance;</span>
+	}
+
+	/**
+	 * Set the RDB driver class name. This method attempts to load the class using
+	 * a Class.forName() call. If the class cannot be found an exception will be
+	 * thrown.
+	 * 
+	 * @param rdbDriverClassName
+	 *          The RDB driver class name
+	 */
+	public void setRdbDriverClassName(String rdbDriverClassName) {
+<span class="nc" id="L82">		this.rdbDriverClassName = rdbDriverClassName;</span>
+
+		try {
+<span class="nc" id="L85">			Class.forName(rdbDriverClassName);</span>
+<span class="nc" id="L86">		} catch (ClassNotFoundException cnfExc) {</span>
+<span class="nc" id="L87">			throw new IllegalArgumentException(&quot;Database driver class not found: &quot;</span>
+					+ rdbDriverClassName, cnfExc);
+<span class="nc" id="L89">		}</span>
+<span class="nc" id="L90">	}</span>
+
+	/**
+	 * Set the URL to the database server
+	 * 
+	 * @param rdbUrl
+	 *          The database server URL
+	 */
+	public void setRdbUrl(String rdbUrl) {
+<span class="nc" id="L99">		this.rdbUrl = rdbUrl;</span>
+<span class="nc" id="L100">	}</span>
+
+	/**
+	 * Set the user id to use when connecting to the database
+	 * 
+	 * @param userId
+	 *          The user id
+	 */
+	public void setUserId(String userId) {
+<span class="nc" id="L109">		this.userId = userId;</span>
+<span class="nc" id="L110">	}</span>
+
+	/**
+	 * Set the password to use when connecting to the database
+	 * 
+	 * @param password
+	 *          The password
+	 */
+	public void setPassword(String password) {
+<span class="nc" id="L119">		this.password = password;</span>
+<span class="nc" id="L120">	}</span>
+
+	/**
+	 * Execute a DDL or DML SQL statement that does not return a result set. This
+	 * includes any DDL as well as DML such as INSERT, UPDATE, and DELETE
+	 * statements.
+	 * 
+	 * @param sql
+	 *          The SQL statement
+	 * 
+	 * @return True of the statement succeeded, false otherwise
+	 */
+	public synchronized boolean execute(String sql) {
+<span class="nc" id="L133">		Connection connection = null;</span>
+<span class="nc" id="L134">		Statement statement = null;</span>
+		boolean result;
+
+<span class="nc" id="L137">		validateConfiguration();</span>
+
+		try {
+<span class="nc" id="L140">			connection = getConnection();</span>
+<span class="nc" id="L141">			statement = getStatement(connection);</span>
+<span class="nc" id="L142">			result = statement.execute(sql);</span>
+<span class="nc" id="L143">		} catch (Throwable throwable) {</span>
+<span class="nc" id="L144">			LOGGER.error(&quot;Unable to execute SQL statement: &quot; + sql, throwable);</span>
+<span class="nc" id="L145">			throw new RuntimeException(&quot;Unable to execute SQL statement: &quot; + sql,</span>
+					throwable);
+		} finally {
+<span class="nc" id="L148">			closeStatement(statement);</span>
+<span class="nc" id="L149">			closeConnection(connection);</span>
+		}
+
+<span class="nc" id="L152">		return result;</span>
+	}
+
+	/**
+	 * Execute a DML SQL statement that returns a result set, such as a SELECT
+	 * statement. Note that the caller is responsible for calling the
+	 * cleanUp(ResultSet) method after processing the returned ResultSet instance.
+	 * 
+	 * @param sql
+	 *          The SQL statment that returns a result set
+	 * 
+	 * @return The results of the query
+	 * 
+	 * @see #cleanUp(ResultSet)
+	 */
+	public synchronized ResultSet executQuery(String sql) {
+<span class="nc" id="L168">		Connection connection = null;</span>
+<span class="nc" id="L169">		Statement statement = null;</span>
+<span class="nc" id="L170">		ResultSet resultSet = null;</span>
+
+<span class="nc" id="L172">		validateConfiguration();</span>
+
+		try {
+<span class="nc" id="L175">			connection = getConnection();</span>
+<span class="nc" id="L176">			statement = getStatement(connection);</span>
+<span class="nc" id="L177">			resultSet = statement.executeQuery(sql);</span>
+<span class="nc" id="L178">			hasOpenResultSet = true;</span>
+<span class="nc" id="L179">		} catch (Throwable throwable) {</span>
+<span class="nc" id="L180">			LOGGER.error(&quot;Unable to execute SQL statement: &quot; + sql, throwable);</span>
+<span class="nc" id="L181">			throw new RuntimeException(&quot;Unable to execute SQL statement: &quot; + sql,</span>
+					throwable);
+<span class="nc" id="L183">		}</span>
+
+<span class="nc" id="L185">		return resultSet;</span>
+	}
+
+	/**
+	 * Close the ResultSet and underlying Statement and Connection objects. This
+	 * should be called after calling the executeQuery(String) method and
+	 * processing the results.
+	 * 
+	 * @param resultSet
+	 *          The result set to close
+	 * 
+	 * @see #executQuery(String)
+	 */
+	public synchronized void cleanUp(ResultSet resultSet) {
+<span class="nc" id="L199">		Connection connection = null;</span>
+<span class="nc" id="L200">		Statement statement = null;</span>
+
+		try {
+<span class="nc" id="L203">			statement = resultSet.getStatement();</span>
+<span class="nc" id="L204">			connection = statement.getConnection();</span>
+<span class="nc" id="L205">		} catch (Throwable throwable) {</span>
+<span class="nc" id="L206">			LOGGER.error(&quot;Failed to cleanup result set statement and connection&quot;,</span>
+					throwable);
+		} finally {
+<span class="nc" id="L209">			closeResultSet(resultSet);</span>
+<span class="nc" id="L210">			closeStatement(statement);</span>
+<span class="nc" id="L211">			closeConnection(connection);</span>
+<span class="nc" id="L212">			hasOpenResultSet = false;</span>
+		}
+<span class="nc" id="L214">	}</span>
+
+	/**
+	 * Closes a result set, reporting any exception that occurs
+	 * 
+	 * @param resultSet
+	 *          The result set to close
+	 */
+	private void closeResultSet(ResultSet resultSet) {
+<span class="nc bnc" id="L223" title="All 2 branches missed.">		if (resultSet != null) {</span>
+			try {
+<span class="nc" id="L225">				resultSet.close();</span>
+<span class="nc" id="L226">			} catch (Throwable throwable) {</span>
+<span class="nc" id="L227">				LOGGER.warn(&quot;Failed to close result set&quot;, throwable);</span>
+<span class="nc" id="L228">			}</span>
+		}
+<span class="nc" id="L230">	}</span>
+
+	/**
+	 * Closes a statement, reporting any exception that occurs
+	 * 
+	 * @param statement
+	 *          The statement to close
+	 */
+	private void closeStatement(Statement statement) {
+<span class="nc bnc" id="L239" title="All 2 branches missed.">		if (statement != null) {</span>
+			try {
+<span class="nc" id="L241">				statement.close();</span>
+<span class="nc" id="L242">			} catch (Throwable throwable) {</span>
+<span class="nc" id="L243">				LOGGER.warn(&quot;Unable to close the statement&quot;, throwable);</span>
+<span class="nc" id="L244">			}</span>
+		}
+<span class="nc" id="L246">	}</span>
+
+	/**
+	 * Closes a connection, reporting any exception that occurs
+	 * 
+	 * @param connection
+	 *          The connection to close
+	 */
+	private void closeConnection(Connection connection) {
+<span class="nc bnc" id="L255" title="All 2 branches missed.">		if (connection != null) {</span>
+			try {
+<span class="nc" id="L257">				connection.close();</span>
+<span class="nc" id="L258">			} catch (Throwable throwable) {</span>
+<span class="nc" id="L259">				LOGGER.warn(&quot;Unable to close the connection&quot;, throwable);</span>
+<span class="nc" id="L260">			}</span>
+		}
+<span class="nc" id="L262">	}</span>
+
+	/**
+	 * Validate that the required configuration information has been set. This is
+	 * used prior to attempting to connect to the database.
+	 */
+	private void validateConfiguration() {
+<span class="nc" id="L269">		StringBuffer errors = new StringBuffer();</span>
+
+<span class="nc bnc" id="L271" title="All 2 branches missed.">		if (rdbDriverClassName == null) {</span>
+<span class="nc" id="L272">			errors.append(&quot;The RDB Driver Class Name has not been set. &quot;);</span>
+		}
+
+<span class="nc bnc" id="L275" title="All 2 branches missed.">		if (rdbUrl == null) {</span>
+<span class="nc" id="L276">			errors.append(&quot;The RDB Url has not been set. &quot;);</span>
+		}
+
+<span class="nc bnc" id="L279" title="All 2 branches missed.">		if (userId == null) {</span>
+<span class="nc" id="L280">			errors.append(&quot;The RDB User Id has not been set. &quot;);</span>
+		}
+
+<span class="nc bnc" id="L283" title="All 2 branches missed.">		if (password == null) {</span>
+<span class="nc" id="L284">			errors.append(&quot;The RDB Password has not been set. &quot;);</span>
+		}
+
+<span class="nc bnc" id="L287" title="All 2 branches missed.">		if (hasOpenResultSet) {</span>
+<span class="nc" id="L288">			errors</span>
+<span class="nc" id="L289">					.append(&quot;There is an active result set. &quot;</span>
+							+ &quot;Make sure to call the cleanUp(ResultSet) method &quot;
+							+ &quot;to release the prior result set before running &quot;
+							+ &quot;another query&quot;);
+		}
+
+<span class="nc bnc" id="L295" title="All 2 branches missed.">		if (errors.length() &gt; 0) {</span>
+<span class="nc" id="L296">			throw new IllegalStateException(errors.toString());</span>
+		}
+<span class="nc" id="L298">	}</span>
+
+	/**
+	 * Obtain a connection to the database
+	 * 
+	 * @return The connection
+	 */
+	private Connection getConnection() {
+<span class="nc" id="L306">		validateConfiguration();</span>
+
+		try {
+<span class="nc" id="L309">			return DriverManager.getConnection(rdbUrl, userId, password);</span>
+<span class="nc" id="L310">		} catch (Throwable throwable) {</span>
+<span class="nc" id="L311">			LOGGER.error(&quot;Unable to obtain a connection to the database: &quot; + rdbUrl,</span>
+					throwable);
+<span class="nc" id="L313">			throw new RuntimeException(</span>
+					&quot;Unable to obtain a connection to the database: &quot; + rdbUrl, throwable);
+		}
+	}
+
+	/**
+	 * Obtain a statement for executing a database query
+	 * 
+	 * @param connection
+	 *          The connection to the database
+	 * 
+	 * @return The statement
+	 */
+	private Statement getStatement(Connection connection) {
+		try {
+<span class="nc" id="L328">			return connection.createStatement();</span>
+<span class="nc" id="L329">		} catch (Throwable throwable) {</span>
+<span class="nc" id="L330">			LOGGER.error(&quot;Unable to obtain a statement&quot;, throwable);</span>
+<span class="nc" id="L331">			throw new RuntimeException(&quot;Unable to obtain a statement&quot;, throwable);</span>
+
+		}
+	}
+
+	/**
+	 * This is a test method for demonstrating all of the steps necessary to
+	 * connect to an RDB and execute a query. The query output is sent to the
+	 * console.
+	 * 
+	 * @see #main(String[])
+	 */
+	private void readDatabase() {
+		try {
+<span class="nc" id="L345">			System.out.println(&quot;Run a database query&quot;);</span>
+<span class="nc" id="L346">			Class.forName(&quot;com.mysql.jdbc.Driver&quot;);</span>
+<span class="nc" id="L347">			Connection conn = DriverManager.getConnection(</span>
+					&quot;jdbc:mysql://localhost:3306/tasklist&quot;, &quot;root&quot;, &quot;rdkf0mh&quot;);
+<span class="nc" id="L349">			Statement stmt = conn.createStatement();</span>
+<span class="nc" id="L350">			ResultSet rs = stmt.executeQuery(&quot;select id, title from tasks&quot;);</span>
+<span class="nc bnc" id="L351" title="All 2 branches missed.">			while (rs.next()) {</span>
+<span class="nc" id="L352">				System.out.println(&quot;id: &quot; + rs.getInt(1) + &quot; title:&quot; + rs.getString(2));</span>
+			}
+<span class="nc" id="L354">			rs.close();</span>
+<span class="nc" id="L355">			stmt.close();</span>
+<span class="nc" id="L356">			conn.close();</span>
+
+<span class="nc" id="L358">		} catch (Throwable throwable) {</span>
+<span class="nc" id="L359">			throwable.printStackTrace();</span>
+<span class="nc" id="L360">			LOGGER.error(&quot;Database problem&quot;, throwable);</span>
+<span class="nc" id="L361">		}</span>
+<span class="nc" id="L362">	}</span>
+
+	/**
+	 * This is provided in order to run the readDatabase demonstration code.
+	 * 
+	 * @param args Arguments to the method, not used
+	 * 
+	 * @see #readDatabase()
+	 */
+	public final static void main(String args[]) {
+<span class="nc" id="L372">		new RdbSingletonFacade().readDatabase();</span>
+<span class="nc" id="L373">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

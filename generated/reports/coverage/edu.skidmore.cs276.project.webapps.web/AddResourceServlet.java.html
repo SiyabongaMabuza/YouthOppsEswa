@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AddResourceServlet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Project Session Coverage Report</a> &gt; <a href="index.source.html" class="el_package">edu.skidmore.cs276.project.webapps.web</a> &gt; <span class="el_source">AddResourceServlet.java</span></div><h1>AddResourceServlet.java</h1><pre class="source lang-java linenums">package edu.skidmore.cs276.project.webapps.web;
+import org.apache.commons.lang3.StringEscapeUtils;
+import java.net.URL;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.io.IOException;
+
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+
+import org.apache.log4j.Logger;
+
+import edu.skidmore.cs276.project.fileio.OpportunitiesPersistence;
+
+/**
+ * &lt;p&gt;
+ * Title: Controller Servlet for the tasklist
+ * &lt;/p&gt;
+ *
+ * &lt;p&gt;
+ * Description: Servlet for displaying and editing the tasklist
+ * &lt;/p&gt;
+ *
+ * @author David Read
+ * @version 01.00.00
+ */
+public class AddResourceServlet extends HttpServlet {
+	/**
+	 * The internal version id of this class
+	 */
+	private static final long serialVersionUID = 19620501L;
+
+	/**
+	 * Servlet version
+	 */
+	private static final String VERSION = &quot;01.00.00&quot;;
+
+	/**
+	 * Logger Instance
+	 */
+<span class="nc" id="L46">	private static Logger LOGGER = Logger.getLogger(AddResourceServlet.class);</span>
+
+	/**
+	 * Called by container when servlet instance is created. logs the current
+	 * version of the servlet.
+	 *
+	 * @param config The servlet configuration
+	 */
+	@Override
+
+    public void init(ServletConfig config) throws ServletException {
+
+<span class="nc" id="L58">        super.init(config);</span>
+
+<span class="nc" id="L60">        LOGGER.warn(&quot;Servlet init. Version: &quot; + VERSION);</span>
+
+<span class="nc" id="L62">    }</span>
+
+	/**
+	 * The constructor - no operations carried out here
+	 */
+<span class="nc" id="L67">	public AddResourceServlet() {</span>
+<span class="nc" id="L68">	}</span>
+
+	/**
+	 * Uses the controller method to process the request.
+	 * 
+	 * @see #controller
+	 *
+	 * @param req  The request
+	 * @param resp The response
+	 *
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	@Override
+	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+<span class="nc" id="L83">        controller(req, resp);</span>
+<span class="nc" id="L84">    }</span>
+
+	/**
+	 * Uses the controller method to process the request.
+	 *
+	 * @see #controller
+	 *
+	 * @param req  The request
+	 * @param resp The response
+	 *
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	@Override
+	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+<span class="nc" id="L99">        controller(req, resp);</span>
+<span class="nc" id="L100">    }</span>
+
+	private void controller(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String forwardingPath;
+<span class="nc" id="L104">        LOGGER.info(&quot;Request method: &quot; + req.getMethod());</span>
+<span class="nc" id="L105">		String csrfToken = (String) req.getSession().getAttribute(&quot;csrfToken&quot;);</span>
+<span class="nc" id="L106">		csrfToken = SecurityUtilities.randomString(30);  </span>
+
+        
+<span class="nc" id="L109">		String role = (String) req.getSession().getAttribute(SessionAttribute.ROLE.getKey());</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">		if (!&quot;admin&quot;.equals(role)) {</span>
+<span class="nc" id="L111">			LOGGER.warn(&quot;Access denied: User role &quot; + role + &quot; not authorized to add resources&quot;);</span>
+<span class="nc" id="L112">			resp.sendRedirect(req.getContextPath() + ControllerInfo.OPPORTUNITIES_VIEW.getMappedPath());</span>
+<span class="nc" id="L113">			return;</span>
+		} else {
+<span class="nc bnc" id="L115" title="All 2 branches missed.">			if (&quot;GET&quot;.equalsIgnoreCase(req.getMethod())) {</span>
+				// Generate CSRF token and store it in the session
+					
+<span class="nc" id="L118">				req.getSession().setAttribute(&quot;CSRF&quot;, csrfToken);</span>
+<span class="nc" id="L119">				req.setAttribute(&quot;csrfToken&quot;, csrfToken);</span>
+<span class="nc" id="L120">				forwardingPath = JspInfo.ADD_RESOURCE.getJspPath();</span>
+			} else {
+				// CSRF Token check
+<span class="nc bnc" id="L123" title="All 2 branches missed.">				if (!validateCsrfToken(req)) {</span>
+<span class="nc" id="L124">					LOGGER.warn(&quot;CSRF token validation failed&quot;);</span>
+<span class="nc" id="L125">					req.setAttribute(RequestAttribute.ERROR_MESSAGE.getKey(), &quot;Invalid csrf token&quot;);</span>
+<span class="nc" id="L126">					req.getRequestDispatcher(JspInfo.ADD_RESOURCE.getJspPath()).forward(req, resp);</span>
+<span class="nc" id="L127">					return;</span>
+				}
+
+<span class="nc" id="L130">				String errorMessage = addResource(req);</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">				if (errorMessage != null) {</span>
+<span class="nc" id="L132">					req.setAttribute(&quot;errorMessage&quot;, errorMessage);</span>
+<span class="nc" id="L133">					req.getRequestDispatcher(JspInfo.ADD_RESOURCE.getJspPath()).forward(req, resp);</span>
+<span class="nc" id="L134">					return;</span>
+				} else {
+<span class="nc" id="L136">					resp.sendRedirect(req.getContextPath() + ControllerInfo.OPPORTUNITIES_VIEW.getMappedPath());</span>
+<span class="nc" id="L137">					return;</span>
+				}
+			}
+		}
+        
+
+<span class="nc" id="L143">        req.getRequestDispatcher(forwardingPath).forward(req, resp);</span>
+<span class="nc" id="L144">    }</span>
+
+	private boolean validateCsrfToken(HttpServletRequest req) {
+<span class="nc" id="L147">		String sessionToken = req.getSession().getAttribute(&quot;CSRF&quot;).toString();</span>
+<span class="nc" id="L148">		String requestToken = req.getParameter(&quot;csrfToken&quot;);</span>
+
+<span class="nc" id="L150">		LOGGER.info(&quot;Validate: Session ID: &quot; + req.getSession().getId());</span>
+<span class="nc" id="L151">		LOGGER.info(&quot;Session token: &quot; + sessionToken);</span>
+<span class="nc" id="L152">		LOGGER.info(&quot;Request token: &quot; + requestToken);</span>
+<span class="nc bnc" id="L153" title="All 4 branches missed.">		if (sessionToken == null || requestToken == null) {</span>
+<span class="nc" id="L154">			return false;</span>
+		}
+
+<span class="nc" id="L157">		return sessionToken.equals(requestToken);</span>
+	}
+
+
+	private String addResource(HttpServletRequest req) {
+<span class="nc" id="L162">		String category = StringEscapeUtils.escapeHtml4(req.getParameter(RequestParameter.CATEGORY.getKey()));</span>
+<span class="nc" id="L163">        String resourceTitle = StringEscapeUtils.escapeHtml4(req.getParameter(RequestParameter.RESOURCE_TITLE.getKey()));</span>
+<span class="nc" id="L164">        String resourceURL = req.getParameter(RequestParameter.RESOURCE_URL.getKey());</span>
+<span class="nc" id="L165">        String description = StringEscapeUtils.escapeHtml4(req.getParameter(RequestParameter.RESOURCE_DESCRIPTION.getKey()));</span>
+
+<span class="nc bnc" id="L167" title="All 12 branches missed.">        if (category != null &amp;&amp; !category.isEmpty() &amp;&amp; resourceTitle != null &amp;&amp; !resourceTitle.isEmpty() &amp;&amp; resourceURL != null &amp;&amp; !resourceURL.isEmpty()) {</span>
+            // validate URL
+			try {
+<span class="nc" id="L170">				new java.net.URL(resourceURL).toURI();</span>
+<span class="nc" id="L171">			} catch (Exception e) {</span>
+<span class="nc" id="L172">				LOGGER.warn(&quot;Invalid URL: &quot; + resourceURL);</span>
+				// Preserve user input
+<span class="nc" id="L174">				req.setAttribute(&quot;category&quot;, category);</span>
+<span class="nc" id="L175">				req.setAttribute(&quot;resourceTitle&quot;, resourceTitle);</span>
+<span class="nc" id="L176">				req.setAttribute(&quot;resourceURL&quot;, resourceURL);</span>
+<span class="nc" id="L177">				req.setAttribute(&quot;description&quot;, description);</span>
+<span class="nc" id="L178">				return &quot;Please enter a valid URL&quot;;</span>
+<span class="nc" id="L179">			}</span>
+
+<span class="nc" id="L181">			String username = (String) req.getSession().getAttribute(SessionAttribute.USER.getKey());</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">			String[] resource = {resourceTitle, resourceURL, description != null ? description : &quot;&quot;};</span>
+<span class="nc" id="L183">			List&lt;String[]&gt; resources = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L184">			resources.add(resource);</span>
+
+			//saving resource to database
+			try {
+<span class="nc" id="L188">				OpportunitiesPersistence.getInstance().saveOpportunities(username, category, resources);</span>
+<span class="nc" id="L189">				LOGGER.info(&quot;Added resource to &quot; + category + &quot;: &quot; + resourceTitle);</span>
+<span class="nc" id="L190">			} catch (IOException e) {</span>
+<span class="nc" id="L191">				LOGGER.error(&quot;Failed to save &quot; + category + &quot; to database&quot;, e);</span>
+<span class="nc" id="L192">				return &quot;Error saving resource to database&quot;;</span>
+<span class="nc" id="L193">			}</span>
+
+
+<span class="nc" id="L196">            LOGGER.info(&quot;Added resource to &quot; + category + &quot;: &quot; + resourceTitle);</span>
+<span class="nc" id="L197">        } else {</span>
+<span class="nc" id="L198">            LOGGER.warn(&quot;Invalid resource data: category=&quot; + category + &quot;, title=&quot; + resourceTitle + &quot;, url=&quot; + resourceURL);</span>
+        }
+<span class="nc" id="L200">		return null;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

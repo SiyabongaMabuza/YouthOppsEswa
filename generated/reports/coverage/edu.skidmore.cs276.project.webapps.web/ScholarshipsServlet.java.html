@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScholarshipsServlet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Project Session Coverage Report</a> &gt; <a href="index.source.html" class="el_package">edu.skidmore.cs276.project.webapps.web</a> &gt; <span class="el_source">ScholarshipsServlet.java</span></div><h1>ScholarshipsServlet.java</h1><pre class="source lang-java linenums">package edu.skidmore.cs276.project.webapps.web;
+
+import java.io.IOException;
+import java.util.List;
+
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+
+import org.apache.log4j.Logger;
+
+import edu.skidmore.cs276.project.fileio.OpportunitiesPersistence;
+
+/**
+ * &lt;p&gt;
+ * Title: Controller Servlet for the tasklist
+ * &lt;/p&gt;
+ *
+ * &lt;p&gt;
+ * Description: Servlet for displaying and editing the tasklist
+ * &lt;/p&gt;
+ *
+ * @author David Read
+ * @version 01.00.00
+ */
+public class ScholarshipsServlet extends HttpServlet {
+	/**
+	 * The internal version id of this class
+	 */
+	private static final long serialVersionUID = 19620501L;
+
+	/**
+	 * Servlet version
+	 */
+	private static final String VERSION = &quot;01.00.00&quot;;
+
+	/**
+	 * Logger Instance
+	 */
+<span class="nc" id="L42">	private static Logger LOGGER = Logger.getLogger(ViewOpportunitiesServlet.class);	</span>
+
+		/**
+	 * Called by container when servlet instance is created. logs the current
+	 * version of the servlet.
+	 *
+	 * @param config The servlet configuration
+	 */
+	@Override
+
+    public void init(ServletConfig config) throws ServletException {
+<span class="nc" id="L53">        super.init(config);</span>
+<span class="nc" id="L54">        LOGGER.warn(&quot;Servlet init. Version: &quot; + VERSION);</span>
+<span class="nc" id="L55">    }</span>
+
+
+	/**
+	 * The constructor - no operations carried out here
+	 */
+<span class="nc" id="L61">	public ScholarshipsServlet() {</span>
+<span class="nc" id="L62">	}</span>
+
+	/**
+	 * Uses the controller method to process the request.
+	 * 
+	 * @see #controller
+	 *
+	 * @param req  The request
+	 * @param resp The response
+	 *
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+<span class="nc" id="L76">		controller(req, resp);</span>
+<span class="nc" id="L77">	}</span>
+
+	/**
+	 * Uses the controller method to process the request.
+	 *
+	 * @see #controller
+	 *
+	 * @param req  The request
+	 * @param resp The response
+	 *
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+<span class="nc" id="L91">		controller(req, resp);</span>
+<span class="nc" id="L92">	}</span>
+
+
+	/**
+	 * The controlling method for the servlet. Manages the processing of the
+	 * request.
+	 * 
+	 * @param req  The request
+	 * @param resp The response
+	 * 
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void controller(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String forwardingPath;
+<span class="nc" id="L107">		LOGGER.info(&quot;Request method: &quot; + req.getMethod());</span>
+
+		// Generate or reuse CSRF token
+<span class="nc" id="L110">        String csrfToken = (String) req.getSession().getAttribute(&quot;CSRF&quot;);</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        if (csrfToken == null) {</span>
+<span class="nc" id="L112">            csrfToken = SecurityUtilities.randomString(30);</span>
+<span class="nc" id="L113">            req.getSession().setAttribute(&quot;CSRF&quot;, csrfToken);</span>
+        }
+<span class="nc" id="L115">        req.setAttribute(&quot;csrfToken&quot;, csrfToken);</span>
+<span class="nc" id="L116">        LOGGER.info(&quot;Set CSRF token: &quot; + csrfToken);</span>
+
+<span class="nc" id="L118">		String userId = (String) req.getSession().getAttribute(SessionAttribute.USER.getKey());</span>
+<span class="nc" id="L119">		List&lt;String[]&gt; scholarships = OpportunitiesPersistence.getInstance()</span>
+<span class="nc" id="L120">			.loadPriorOpportunities(userId, &quot;scholarships&quot;);</span>
+<span class="nc" id="L121">		LOGGER.info(&quot;Fetched scholarships for user &quot; + userId + &quot;: &quot; + scholarships.size() + &quot; items&quot;);</span>
+<span class="nc" id="L122">		req.setAttribute(&quot;scholarships&quot;, scholarships); // Pass to JSP</span>
+<span class="nc" id="L123">		forwardingPath = &quot;/WEB-INF/hiddenjsp/scholarships.jsp&quot;;</span>
+		
+
+<span class="nc" id="L126">        req.getRequestDispatcher(forwardingPath).forward(req, resp);</span>
+			
+<span class="nc" id="L128">	}</span>
+	
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

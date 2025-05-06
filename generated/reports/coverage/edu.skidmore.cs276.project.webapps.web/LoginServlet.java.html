@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginServlet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Project Session Coverage Report</a> &gt; <a href="index.source.html" class="el_package">edu.skidmore.cs276.project.webapps.web</a> &gt; <span class="el_source">LoginServlet.java</span></div><h1>LoginServlet.java</h1><pre class="source lang-java linenums">package edu.skidmore.cs276.project.webapps.web;
+
+
+import java.io.IOException;
+
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+
+import org.apache.log4j.Logger;
+
+import edu.skidmore.cs276.project.fileio.OpportunitiesPersistence;
+
+
+/**
+ * &lt;p&gt;
+ * Title: Controller Servlet for loggin in
+ * &lt;/p&gt;
+ *
+ * &lt;p&gt;
+ * Description: Servlet for logging into the oppourtunities website
+ * &lt;/p&gt;
+ *
+ * @author David Read
+ * @version 01.00.00
+ */
+public class LoginServlet extends HttpServlet {
+	/**
+	 * The internal version id of this class
+	 */
+	private static final long serialVersionUID = 19620501L;
+
+	/**
+	 * Servlet version
+	 */
+	private static final String VERSION = &quot;01.00.00&quot;;
+
+	/**
+	 * Logger Instance
+	 */
+<span class="nc" id="L43">	private static Logger LOGGER = Logger.getLogger(LoginServlet.class);</span>
+
+
+	/**
+	 * Called by container when servlet instance is created. logs the current
+	 * version of the servlet.
+	 *
+	 * @param config The servlet configuration
+	 */
+	@Override
+
+    public void init(ServletConfig config) throws ServletException {
+
+<span class="nc" id="L56">        super.init(config);</span>
+
+<span class="nc" id="L58">        LOGGER.warn(&quot;Servlet init. Version: &quot; + VERSION);</span>
+
+<span class="nc" id="L60">    }</span>
+
+	/**
+	 * The constructor - no operations carried out here
+	 */
+<span class="nc" id="L65">	public LoginServlet() {</span>
+<span class="nc" id="L66">	}</span>
+
+	/**
+	 * Uses the controller method to process the request.
+	 * 
+	 * @see #controller
+	 *
+	 * @param req  The request
+	 * @param resp The response
+	 *
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+<span class="nc" id="L80">		controller(req, resp);</span>
+<span class="nc" id="L81">	}</span>
+
+	/**
+	 * Uses the controller method to process the request.
+	 *
+	 * @see #controller
+	 *
+	 * @param req  The request
+	 * @param resp The response
+	 *
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+<span class="nc" id="L95">		controller(req, resp);</span>
+<span class="nc" id="L96">	}</span>
+
+	/**
+	 * The controlling method for the servlet. Manages the processing of the
+	 * request.
+	 * 
+	 * @param req  The request
+	 * @param resp The response
+	 * 
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void controller(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String forwardingPath;
+<span class="nc" id="L110">		LOGGER.info(&quot;Request method: &quot; + req.getMethod());</span>
+
+		
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		if (req.getParameter(RequestParameter.LOGIN_PASSWORD.getKey()) == null) {</span>
+<span class="nc" id="L114">			forwardingPath = setupForLogin(req);</span>
+		} else {
+<span class="nc" id="L116">			OpportunitiesPersistence.User authenticatedUser = authenticateUser(req);</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">			if (authenticatedUser != null) {</span>
+<span class="nc" id="L118">				setupSession(authenticatedUser, req);</span>
+<span class="nc" id="L119">				forwardingPath = ControllerInfo.OPPORTUNITIES_VIEW.getMappedPath();</span>
+			} else {
+<span class="nc" id="L121">				req.setAttribute(&quot;errorMessage&quot;, &quot;Invalid username or password&quot;);</span>
+<span class="nc" id="L122">				forwardingPath = setupForLogin(req);</span>
+			}
+		}
+		
+
+<span class="nc" id="L127">		req.getRequestDispatcher(forwardingPath).forward(req, resp);</span>
+<span class="nc" id="L128">	}</span>
+
+	/**
+	 * Setup the session with the user's internal id and tasklist
+	 * 
+	 * @param authenticatedUser The user's internal id
+	 * @param req               The request
+	 */
+	private void setupSession(OpportunitiesPersistence.User authenticatedUser, HttpServletRequest req) {
+<span class="nc" id="L137">		String username = authenticatedUser.getId();</span>
+<span class="nc" id="L138">		req.getSession().setAttribute(SessionAttribute.USER.getKey(), username);</span>
+<span class="nc" id="L139">		req.getSession().setAttribute(SessionAttribute.ROLE.getKey(), authenticatedUser.getRole());</span>
+<span class="nc" id="L140">		OpportunitiesPersistence persistence = OpportunitiesPersistence.getInstance();</span>
+<span class="nc" id="L141">        req.getSession().setAttribute(SessionAttribute.SCHOLARSHIPS.getKey(), </span>
+<span class="nc" id="L142">            persistence.loadPriorOpportunities(username, &quot;scholarships&quot;));</span>
+<span class="nc" id="L143">        req.getSession().setAttribute(SessionAttribute.GRANTS.getKey(), </span>
+<span class="nc" id="L144">            persistence.loadPriorOpportunities(username, &quot;grants&quot;));</span>
+<span class="nc" id="L145">        req.getSession().setAttribute(SessionAttribute.JOBS.getKey(), </span>
+<span class="nc" id="L146">            persistence.loadPriorOpportunities(username, &quot;jobs&quot;));</span>
+<span class="nc" id="L147">			LOGGER.info(&quot;Loaded opportunities for user: &quot; + username + &quot; with role: &quot; + authenticatedUser.getRole());	}</span>
+
+	/**
+	 * Check the user's credentials. If correct then return the user's internal id.
+	 * 
+	 * @param req The request
+	 * 
+	 * @return The user's internal id or null if unauthenticated
+	 */
+	private OpportunitiesPersistence.User authenticateUser(HttpServletRequest req) {
+<span class="nc" id="L157">		String username = StringUtilities.noNull(req.getParameter(RequestParameter.USERNAME.getKey()));</span>
+<span class="nc" id="L158">		String password = StringUtilities.noNull(req.getParameter(RequestParameter.LOGIN_PASSWORD.getKey()));</span>
+<span class="nc" id="L159">		LOGGER.info(&quot;Attempting login for username: &quot; + username + &quot; with password: &quot; + password);</span>
+
+<span class="nc bnc" id="L161" title="All 4 branches missed.">		if (username.isEmpty() || password.isEmpty()) {</span>
+<span class="nc" id="L162">			LOGGER.warn(&quot;Login failed: Empty username or password&quot;);</span>
+<span class="nc" id="L163">            return null;</span>
+        }
+
+<span class="nc" id="L166">        OpportunitiesPersistence persistence = OpportunitiesPersistence.getInstance();</span>
+		try {
+<span class="nc" id="L168">            OpportunitiesPersistence.User user = persistence.getUser(username);</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">            if (user == null) {</span>
+<span class="nc" id="L170">                LOGGER.warn(&quot;Login failed: Username not found: &quot; + username);</span>
+<span class="nc" id="L171">                return null;</span>
+            }
+<span class="nc" id="L173">            LOGGER.info(&quot;User found: &quot; + user.getUsername() + &quot;, stored password: &quot; + user.getPassword());</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">            if (password.equals(user.getPassword())) {</span>
+<span class="nc" id="L175">                LOGGER.info(&quot;Login successful for username: &quot; + username);</span>
+<span class="nc" id="L176">                return user;</span>
+            } else {
+<span class="nc" id="L178">                LOGGER.warn(&quot;Login failed: Incorrect password for username: &quot; + username + &quot; (entered: &quot; + password + &quot;, stored: &quot; + user.getPassword() + &quot;)&quot;);</span>
+<span class="nc" id="L179">                return null;</span>
+            }
+<span class="nc" id="L181">        } catch (IOException e) {</span>
+<span class="nc" id="L182">            LOGGER.error(&quot;Error accessing user database for username: &quot; + username, e);</span>
+<span class="nc" id="L183">            return null;</span>
+        }
+	}
+
+	/**
+	 * Prepare data for the login screen
+	 * 
+	 * @param req The request
+	 * 
+	 * @return The JSP for rendering the login page
+	 */
+	private String setupForLogin(HttpServletRequest req) {
+<span class="nc" id="L195">		String loginId = StringUtilities.noNull(req.getParameter(RequestParameter.LOGIN_ID.getKey()));</span>
+<span class="nc" id="L196">		req.setAttribute(RequestParameter.LOGIN_ID.getKey(), loginId);</span>
+
+<span class="nc" id="L198">		return JspInfo.LOGIN.getJspPath();</span>
+	}
+
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

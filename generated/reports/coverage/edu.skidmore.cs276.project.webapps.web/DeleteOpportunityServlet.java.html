@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeleteOpportunityServlet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Project Session Coverage Report</a> &gt; <a href="index.source.html" class="el_package">edu.skidmore.cs276.project.webapps.web</a> &gt; <span class="el_source">DeleteOpportunityServlet.java</span></div><h1>DeleteOpportunityServlet.java</h1><pre class="source lang-java linenums">package edu.skidmore.cs276.project.webapps.web;
+
+import java.io.IOException;
+
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import org.apache.log4j.Logger;
+import edu.skidmore.cs276.project.fileio.OpportunitiesPersistence;
+
+public class DeleteOpportunityServlet extends HttpServlet {
+    private static final long serialVersionUID = 19620501L;
+    private static final String VERSION = &quot;01.00.00&quot;;
+<span class="nc" id="L16">    private static Logger LOGGER = Logger.getLogger(DeleteOpportunityServlet.class);</span>
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+<span class="nc" id="L20">        super.init(config);</span>
+<span class="nc" id="L21">        LOGGER.warn(&quot;Servlet init. Version: &quot; + VERSION);</span>
+<span class="nc" id="L22">    }</span>
+
+<span class="nc" id="L24">    public DeleteOpportunityServlet() {}</span>
+
+    @Override
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+<span class="nc" id="L28">        controller(req, resp);</span>
+<span class="nc" id="L29">    }</span>
+
+    @Override
+    public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+<span class="nc" id="L33">        controller(req, resp);</span>
+<span class="nc" id="L34">    }</span>
+
+    private void controller(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+<span class="nc" id="L37">        LOGGER.info(&quot;Request method: &quot; + req.getMethod());</span>
+
+<span class="nc" id="L39">        String role = (String) req.getSession().getAttribute(SessionAttribute.ROLE.getKey());</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (!&quot;admin&quot;.equals(role)) {</span>
+<span class="nc" id="L41">            LOGGER.warn(&quot;Access denied: User role &quot; + role + &quot; not authorized to delete resources&quot;);</span>
+<span class="nc" id="L42">            resp.sendRedirect(req.getContextPath() + ControllerInfo.OPPORTUNITIES_VIEW.getMappedPath());</span>
+<span class="nc" id="L43">            return;</span>
+        }
+
+<span class="nc" id="L46">        String category = req.getParameter(RequestParameter.CATEGORY.getKey());</span>
+<span class="nc" id="L47">        String url = req.getParameter(RequestParameter.RESOURCE_URL.getKey());</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        String returnPath = req.getParameter(&quot;returnPath&quot;) != null</span>
+<span class="nc" id="L49">            ? req.getParameter(&quot;returnPath&quot;)</span>
+<span class="nc" id="L50">            : req.getContextPath() + ControllerInfo.OPPORTUNITIES_VIEW.getMappedPath();</span>
+
+<span class="nc" id="L52">        LOGGER.info(&quot;Received parameters: category=&quot; + category + &quot;, url=&quot; + url + &quot;, returnPath=&quot; + returnPath);</span>
+
+<span class="nc bnc" id="L54" title="All 4 branches missed.">        if (category != null &amp;&amp; url != null) {</span>
+            try {
+<span class="nc bnc" id="L56" title="All 2 branches missed.">                if (validateCsrfToken(req)) {</span>
+<span class="nc" id="L57">                    OpportunitiesPersistence.getInstance().deleteOpportunity(category, url);</span>
+<span class="nc" id="L58">                    LOGGER.info(&quot;Deleted &quot; + category + &quot; with URL: &quot; + url);</span>
+                } else {
+<span class="nc" id="L60">                    LOGGER.warn(&quot;CSRF validation failed on delete request&quot;);</span>
+<span class="nc" id="L61">                    req.getSession().setAttribute(&quot;errorMessage&quot;, &quot;Opportunity not deleted. CSRF validation failed.&quot;);</span>
+<span class="nc" id="L62">                    resp.sendRedirect(returnPath);</span>
+<span class="nc" id="L63">                    return;</span>
+                }
+<span class="nc" id="L65">            } catch (RuntimeException e) {</span>
+<span class="nc" id="L66">                LOGGER.error(&quot;Failed to delete &quot; + category + &quot; with URL: &quot; + url, e);</span>
+<span class="nc" id="L67">                req.getSession().setAttribute(&quot;errorMessage&quot;, &quot;Failed to delete opportunity: &quot; + e.getMessage());</span>
+<span class="nc" id="L68">                resp.sendRedirect(returnPath);</span>
+<span class="nc" id="L69">                return;</span>
+<span class="nc" id="L70">            }</span>
+        } else {
+<span class="nc" id="L72">            LOGGER.warn(&quot;Missing category or URL for deletion: category=&quot; + category + &quot;, url=&quot; + url);</span>
+<span class="nc" id="L73">            req.getSession().setAttribute(&quot;errorMessage&quot;, &quot;Invalid deletion request: missing category or URL&quot;);</span>
+        }
+
+<span class="nc" id="L76">        resp.sendRedirect(returnPath);</span>
+<span class="nc" id="L77">    }</span>
+
+    private boolean validateCsrfToken(HttpServletRequest req) {
+<span class="nc" id="L80">        String sessionToken = (String) req.getSession().getAttribute(&quot;CSRF&quot;);</span>
+<span class="nc" id="L81">        String requestToken = req.getParameter(RequestParameter.CSRF_TOKEN.getKey());</span>
+
+<span class="nc" id="L83">        LOGGER.info(&quot;Validate: Session ID: &quot; + req.getSession().getId());</span>
+<span class="nc" id="L84">        LOGGER.info(&quot;Session token: &quot; + sessionToken);</span>
+<span class="nc" id="L85">        LOGGER.info(&quot;Request token: &quot; + requestToken);</span>
+
+<span class="nc bnc" id="L87" title="All 6 branches missed.">        return sessionToken != null &amp;&amp; requestToken != null &amp;&amp; sessionToken.equals(requestToken);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

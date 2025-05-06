@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DatabaseSetupListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Project Session Coverage Report</a> &gt; <a href="index.source.html" class="el_package">edu.skidmore.cs276.project.webapps.web</a> &gt; <span class="el_source">DatabaseSetupListener.java</span></div><h1>DatabaseSetupListener.java</h1><pre class="source lang-java linenums">package edu.skidmore.cs276.project.webapps.web;
+
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import org.apache.log4j.Logger;
+import edu.skidmore.cs276.project.rdb.RdbSingletonFacade;
+
+<span class="nc" id="L9">public class DatabaseSetupListener implements ServletContextListener {</span>
+<span class="nc" id="L10">    private static final Logger LOGGER = Logger.getLogger(DatabaseSetupListener.class);</span>
+
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
+<span class="nc" id="L14">        LOGGER.info(&quot;Initializing database connection for application&quot;);</span>
+<span class="nc" id="L15">        ServletContext context = sce.getServletContext();</span>
+<span class="nc" id="L16">        RdbSingletonFacade rdb = RdbSingletonFacade.getInstance();</span>
+        try {
+<span class="nc" id="L18">            rdb.setRdbDriverClassName(context.getInitParameter(&quot;RdbDriverClass&quot;));</span>
+<span class="nc" id="L19">            rdb.setRdbUrl(context.getInitParameter(&quot;RdbUrl&quot;));</span>
+<span class="nc" id="L20">            rdb.setUserId(context.getInitParameter(&quot;RdbUserId&quot;));</span>
+<span class="nc" id="L21">            rdb.setPassword(context.getInitParameter(&quot;RdbPassword&quot;));</span>
+<span class="nc" id="L22">            LOGGER.info(&quot;Database connection setup complete&quot;);</span>
+<span class="nc" id="L23">        } catch (Throwable throwable) {</span>
+<span class="nc" id="L24">            LOGGER.fatal(&quot;Unable to setup the database&quot;, throwable);</span>
+<span class="nc" id="L25">            throw new IllegalStateException(&quot;Unable to setup the database connection&quot;, throwable);</span>
+<span class="nc" id="L26">        }</span>
+<span class="nc" id="L27">    }</span>
+
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+<span class="nc" id="L31">        LOGGER.info(&quot;Application shutting down; no database cleanup needed&quot;);</span>
+<span class="nc" id="L32">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

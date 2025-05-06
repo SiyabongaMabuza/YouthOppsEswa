@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Task.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Project Session Coverage Report</a> &gt; <a href="index.source.html" class="el_package">edu.skidmore.cs276.project.beans.tasklist</a> &gt; <span class="el_source">Task.java</span></div><h1>Task.java</h1><pre class="source lang-java linenums">package edu.skidmore.cs276.project.beans.tasklist;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.UUID;
+
+/**
+ * Represents a task.
+ * 
+ * @author David Read
+ * @version 01.00.00
+ *
+ */
+public class Task implements Serializable {
+	/**
+	 * The internal version id of this class
+	 */
+	private static final long serialVersionUID = 19620501;
+
+	private String id;
+	private Date dueDate;
+	private String title;
+	private String description;
+	private Boolean completed;
+
+	/**
+	 * Create a task that has no due date
+	 * 
+	 * @param title
+	 *          The task's title
+	 * @param description
+	 *          The task's description
+	 */
+	public Task(String title, String description) {
+<span class="nc" id="L35">		this(null, title, description);</span>
+<span class="nc" id="L36">	}</span>
+
+	/**
+	 * Create a task that includes a due date
+	 * 
+	 * @param dueDate
+	 *          The task's due date
+	 * @param title
+	 *          The task's title
+	 * @param description
+	 *          The task's description
+	 */
+	public Task(Date dueDate, String title, String description) {
+<span class="nc" id="L49">		this(null, dueDate, title, description);</span>
+<span class="nc" id="L50">	}</span>
+
+	/**
+	 * Create a task with optional id and due date
+	 * 
+	 * @param id
+	 *          The task's unique identifier (optional) - if null then one will be
+	 *          generated
+	 * @param dueDate
+	 *          The task's due date (optional)
+	 * @param title
+	 *          The task's title
+	 * @param description
+	 *          The task's description
+	 */
+<span class="nc" id="L65">	public Task(String id, Date dueDate, String title, String description) {</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">		if (id == null) {</span>
+<span class="nc" id="L67">			setId(UUID.randomUUID().toString());</span>
+		} else {
+<span class="nc" id="L69">			setId(id);</span>
+		}
+
+<span class="nc" id="L72">		setDueDate(dueDate);</span>
+<span class="nc" id="L73">		setTitle(title);</span>
+<span class="nc" id="L74">		setDescription(description);</span>
+<span class="nc" id="L75">	}</span>
+
+	/**
+	 * Get the task's unique id
+	 * 
+	 * @return The task's id
+	 */
+	public String getId() {
+<span class="nc" id="L83">		return id;</span>
+	}
+
+	/**
+	 * Set the task's unique id
+	 * 
+	 * @param id
+	 *          The task's id
+	 */
+	public void setId(String id) {
+<span class="nc" id="L93">		this.id = id;</span>
+<span class="nc" id="L94">	}</span>
+
+	/**
+	 * Get the task's due date. If there is no due date this will be null.
+	 * 
+	 * @return The task's due date
+	 */
+	public Date getDueDate() {
+<span class="nc" id="L102">		return dueDate;</span>
+	}
+
+	/**
+	 * Set the tasks' due date. This may be null if there is no due date.
+	 * 
+	 * @param dueDate
+	 *          The task's due date
+	 */
+	public void setDueDate(Date dueDate) {
+<span class="nc" id="L112">		this.dueDate = dueDate;</span>
+<span class="nc" id="L113">	}</span>
+
+	/**
+	 * Get the task's title
+	 * 
+	 * @return The task's title
+	 */
+	public String getTitle() {
+<span class="nc" id="L121">		return title;</span>
+	}
+
+	/**
+	 * Set the task's title
+	 * 
+	 * @param title
+	 *          The task's title
+	 */
+	public void setTitle(String title) {
+<span class="nc" id="L131">		this.title = title;</span>
+<span class="nc" id="L132">	}</span>
+
+	/**
+	 * Get the task's description
+	 * 
+	 * @return The task's description
+	 */
+	public String getDescription() {
+<span class="nc" id="L140">		return description;</span>
+	}
+
+	/**
+	 * Set the task's description
+	 * 
+	 * @param description
+	 *          The task's description
+	 */
+	public void setDescription(String description) {
+<span class="nc" id="L150">		this.description = description;</span>
+<span class="nc" id="L151">	}</span>
+
+	/**
+	 * Determine whether the task has been completed
+	 * 
+	 * @return True if the task has been completed
+	 */
+	public Boolean isCompleted() {
+<span class="nc" id="L159">		return completed;</span>
+	}
+
+	/**
+	 * Set whether the task has been completed
+	 * 
+	 * @param completed
+	 *          True if the task has been completed
+	 */
+	public void setCompleted(Boolean completed) {
+<span class="nc" id="L169">		this.completed = completed;</span>
+<span class="nc" id="L170">	}</span>
+
+	/**
+	 * Get a String representation of the task. This returns the internal id of
+	 * the task and its title.
+	 * 
+	 * @return The task's id and title
+	 */
+	public String toString() {
+<span class="nc" id="L179">		return id + &quot;: &quot; + title;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

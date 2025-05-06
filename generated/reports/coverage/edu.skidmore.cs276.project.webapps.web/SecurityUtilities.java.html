@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityUtilities.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Project Session Coverage Report</a> &gt; <a href="index.source.html" class="el_package">edu.skidmore.cs276.project.webapps.web</a> &gt; <span class="el_source">SecurityUtilities.java</span></div><h1>SecurityUtilities.java</h1><pre class="source lang-java linenums">package edu.skidmore.cs276.project.webapps.web;
+
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.security.SecureRandom;
+import java.util.Random;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+import org.apache.commons.codec.binary.Base64;
+
+import nl.captcha.Captcha;
+
+/**
+ * A library of static functions used to support the demonstration of web
+ * security concepts
+ * 
+ * This library is for class use only and is NOT designed or tested for
+ * production use.
+ * 
+ * @author David Read
+ * @version 01.00.00
+ *
+ */
+public class SecurityUtilities {
+
+	/**
+	 * A secure random instance used for generating secure random values
+	 */
+<span class="fc" id="L30">	private final static SecureRandom random = new SecureRandom();</span>
+
+	/**
+	 * This is a library of static functions, no instance should be created
+	 */
+	private SecurityUtilities() {
+
+	}
+
+	/**
+	 * Validate the CAPTCHA value, comparing the generated value with the one
+	 * entered by the user.
+	 * 
+	 * @param req The request containing the user's session and entered CAPTCHA
+	 *            value
+	 * 
+	 * @return True if the CAPTCHA value entered matches the one in the session
+	 */
+	public final static boolean isCaptchaValueValid(HttpServletRequest req) {
+<span class="nc" id="L49">		boolean isValid = false;</span>
+<span class="nc" id="L50">		Captcha captcha = (Captcha) req.getSession().getAttribute(Captcha.NAME);</span>
+<span class="nc" id="L51">		String userEnteredCaptchaValue = req.getParameter(RequestParameter.CAPTCHA_VALUE.getKey());</span>
+
+<span class="nc bnc" id="L53" title="All 4 branches missed.">		if (captcha != null &amp;&amp; userEnteredCaptchaValue != null) {</span>
+<span class="nc" id="L54">			isValid = captcha.isCorrect(userEnteredCaptchaValue);</span>
+		}
+
+<span class="nc" id="L57">		return isValid;</span>
+	}
+
+	/**
+	 * Create a random string of characters using Java's SecureRandom class. The
+	 * processes creates an array of random bytes and then Base64 encodes the byte
+	 * array. Finally it returns a String of the encoded characters matching the
+	 * requested length.
+	 * 
+	 * @param requestLength The length of the String to create
+	 * 
+	 * @return A String of random bytes, encoded with Base64
+	 */
+	public final static String randomString(int requestLength) {
+<span class="fc" id="L71">		Random random = new SecureRandom();</span>
+		byte[] randomValue;
+		byte[] base64Value;
+		
+<span class="fc" id="L75">		randomValue = new byte[requestLength];</span>
+<span class="fc" id="L76">		random.nextBytes(randomValue);</span>
+<span class="fc" id="L77">		base64Value = Base64.encodeBase64(randomValue);</span>
+<span class="fc" id="L78">		String finalValue = new String(base64Value, 0, requestLength);</span>
+		
+<span class="fc" id="L80">		return finalValue;</span>
+	}
+
+	/**
+	 * Collect some data to determine frequencies of characters in the random
+	 * strings being generated
+	 * 
+	 * @param numIterations How many random values to be generated and collected
+	 */
+	public final static void collectRandomData(long numIterations) {
+<span class="nc" id="L90">		char min = Character.MAX_VALUE;</span>
+<span class="nc" id="L91">		char max = 0;</span>
+<span class="nc" id="L92">		int[] freq = new int[255];</span>
+<span class="nc" id="L93">		PrintWriter out = null;</span>
+
+<span class="nc bnc" id="L95" title="All 2 branches missed.">		for (int x = 0; x &lt; freq.length; ++x) {</span>
+<span class="nc" id="L96">			freq[x] = 0;</span>
+		}
+
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		for (int x = 0; x &lt; numIterations; ++x) {</span>
+<span class="nc" id="L100">			String value = randomString(30);</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">			for (char oneChar : value.toCharArray()) {</span>
+<span class="nc" id="L102">				min = (char) Math.min(min, oneChar);</span>
+<span class="nc" id="L103">				max = (char) Math.max(max, oneChar);</span>
+<span class="nc" id="L104">				freq[oneChar]++;</span>
+			}
+<span class="nc" id="L106">			System.out.print(value + &quot; : &quot;);</span>
+<span class="nc" id="L107">			System.out.println(&quot;min:&quot; + min + &quot; max:&quot; + max);</span>
+		}
+
+		try {
+<span class="nc" id="L111">			out = new PrintWriter(new FileWriter(&quot;char.freq.tsv&quot;));</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">			for (char index = '+'; index &lt;= 'z'; ++index) {</span>
+<span class="nc" id="L113">				out.println(index + &quot;\t&quot; + freq[index]);</span>
+			}
+<span class="nc" id="L115">		} catch (Throwable throwable) {</span>
+<span class="nc" id="L116">			System.err.println(&quot;Unable to write frequencies to file&quot;);</span>
+<span class="nc" id="L117">			throwable.printStackTrace();</span>
+		} finally {
+<span class="nc bnc" id="L119" title="All 2 branches missed.">			if (out != null) {</span>
+				try {
+<span class="nc" id="L121">					out.close();</span>
+<span class="nc" id="L122">				} catch (Throwable throwable) {</span>
+<span class="nc" id="L123">					System.err.println(&quot;Unable to close frequencies file&quot;);</span>
+<span class="nc" id="L124">					throwable.printStackTrace();</span>
+<span class="nc" id="L125">				}</span>
+			}
+		}
+<span class="nc" id="L128">	}</span>
+
+	/**
+	 * Show the effect of using the same and different seeds with Random and
+	 * SecureRandom classes
+	 */
+	private final static void randomSamples() {
+<span class="nc" id="L135">		Random random1 = new Random();</span>
+<span class="nc" id="L136">		Random random2 = new Random();</span>
+<span class="nc" id="L137">		Random secureRandom1 = new SecureRandom();</span>
+<span class="nc" id="L138">		Random secureRandom2 = new SecureRandom();</span>
+
+<span class="nc" id="L140">		random1.setSeed(10);</span>
+<span class="nc" id="L141">		random2.setSeed(10);</span>
+<span class="nc" id="L142">		secureRandom1.setSeed(10);</span>
+<span class="nc" id="L143">		secureRandom2.setSeed(10);</span>
+
+<span class="nc" id="L145">		showRandom(5, random1);</span>
+<span class="nc" id="L146">		showRandom(5, random2);</span>
+<span class="nc" id="L147">		showRandom(5, secureRandom1);</span>
+<span class="nc" id="L148">		showRandom(5, secureRandom2);</span>
+<span class="nc" id="L149">	}</span>
+
+	/**
+	 * Send a set of random values to standard out.
+	 * 
+	 * @param numValues       The number of values to generate
+	 * @param randomGenerator The random number generator to use
+	 */
+	private final static void showRandom(int numValues, Random randomGenerator) {
+<span class="nc bnc" id="L158" title="All 2 branches missed.">		for (int count = 0; count &lt; numValues; ++count) {</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">			if (count &gt; 0) {</span>
+<span class="nc" id="L160">				System.out.print(&quot;, &quot;);</span>
+			}
+<span class="nc" id="L162">			System.out.print(randomGenerator.nextInt());</span>
+		}
+
+<span class="nc" id="L165">		System.out.println();</span>
+<span class="nc" id="L166">	}</span>
+
+	public final static void main(String[] args) {
+<span class="nc" id="L169">		randomSamples();</span>
+<span class="nc" id="L170">		System.out.println(randomString(30));</span>
+<span class="nc" id="L171">		System.out.println(&quot;Google &quot; + Base64.encodeBase64String(&quot;Google&quot;.getBytes()));</span>
+<span class="nc" id="L172">		System.out.println(&quot;Goodie &quot; + Base64.encodeBase64String(&quot;Goodie&quot;.getBytes()));</span>
+<span class="nc" id="L173">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OpportunitiesPersistence.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Project Session Coverage Report</a> &gt; <a href="index.source.html" class="el_package">edu.skidmore.cs276.project.fileio</a> &gt; <span class="el_source">OpportunitiesPersistence.java</span></div><h1>OpportunitiesPersistence.java</h1><pre class="source lang-java linenums">package edu.skidmore.cs276.project.fileio;
+
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+
+import edu.skidmore.cs276.project.rdb.RdbSingletonFacade;
+import edu.skidmore.cs276.project.webapps.web.StringUtilities;
+
+public class OpportunitiesPersistence {
+    /* Single instance of the class */
+    private static OpportunitiesPersistence instance;
+
+    /* Logger instace */
+<span class="nc" id="L19">    private static Logger LOGGER = Logger.getLogger(OpportunitiesPersistence.class);</span>
+
+    /* Singleton - private constructor */
+    private OpportunitiesPersistence() {
+       
+    }
+
+    /**
+	 * Get the singleton instance
+	 * 
+	 * @return The instance
+	 */
+	public static synchronized OpportunitiesPersistence getInstance() {
+<span class="nc bnc" id="L32" title="All 2 branches missed.">		if (instance == null) {</span>
+<span class="nc" id="L33">			instance = new OpportunitiesPersistence();</span>
+		}
+
+<span class="nc" id="L36">		return instance;</span>
+	}
+
+    /**
+     * Count the total number of opportunities in a given category.
+     * 
+     * @param category The type of opportunity (scholarships, grants, jobs)
+     * @return The count of opportunities
+     * @throws IOException If a database error occurs
+     */
+    public int countOpportunities(String category) throws IOException {
+<span class="nc" id="L47">        RdbSingletonFacade rdb = RdbSingletonFacade.getInstance();</span>
+<span class="nc" id="L48">        String tableName = getTableName(category);</span>
+<span class="nc" id="L49">        ResultSet rs = null;</span>
+        try {
+<span class="nc" id="L51">            String sql = &quot;SELECT COUNT(*) FROM &quot; + tableName;</span>
+<span class="nc" id="L52">            rs = rdb.executQuery(sql);</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L54">                return rs.getInt(1);</span>
+            } else {
+<span class="nc" id="L56">                LOGGER.error(&quot;Failed to retrieve count for &quot; + category + &quot;: No rows returned&quot;);</span>
+<span class="nc" id="L57">                return 0;</span>
+            }
+<span class="nc" id="L59">        } catch (SQLException e) {</span>
+<span class="nc" id="L60">            LOGGER.error(&quot;Database error while counting &quot; + category, e);</span>
+<span class="nc" id="L61">            throw new IOException(&quot;Error counting opportunities&quot;, e);</span>
+        } finally {
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            if (rs != null) {</span>
+<span class="nc" id="L64">                rdb.cleanUp(rs);</span>
+            }
+        }
+    }
+
+    /**
+     * Retrieve opportunities from the database for a given user and category
+     * 
+     * @param userIdentifier The user's identifier
+     * @param category The type of opportunity (scholarships, grants, jobs)
+     * @return The loaded list of opportunities
+     */
+    public List&lt;String[]&gt; loadPriorOpportunities(String userIdentifier, String category) {
+<span class="nc" id="L77">        RdbSingletonFacade rdb = RdbSingletonFacade.getInstance();</span>
+<span class="nc" id="L78">        List&lt;String[]&gt; opportunities = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L79">        ResultSet results = null;</span>
+<span class="nc" id="L80">        String tableName = getTableName(category);</span>
+
+        try {
+<span class="nc" id="L83">            results = rdb.executQuery(</span>
+                &quot;SELECT title, url, description FROM &quot; + tableName);
+
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            while (results.next()) {</span>
+<span class="nc" id="L87">                String[] opportunity = new String[3];</span>
+<span class="nc" id="L88">                opportunity[0] = results.getString(&quot;title&quot;);</span>
+<span class="nc" id="L89">                opportunity[1] = results.getString(&quot;url&quot;);</span>
+<span class="nc" id="L90">                opportunity[2] = results.getString(&quot;description&quot;);</span>
+<span class="nc" id="L91">                opportunities.add(opportunity);</span>
+<span class="nc" id="L92">            }</span>
+<span class="nc" id="L93">        } catch (Throwable throwable) {</span>
+<span class="nc" id="L94">            LOGGER.error(&quot;Unable to load prior &quot; + category + &quot; from the database&quot;, throwable);</span>
+<span class="nc" id="L95">            throw new RuntimeException(&quot;Unable to load prior &quot; + category + &quot; from the database&quot;, throwable);</span>
+        } finally {
+<span class="nc" id="L97">            rdb.cleanUp(results);</span>
+        }
+
+<span class="nc" id="L100">        return opportunities;</span>
+    }
+
+    /**
+     * Save opportunities into the database for a given user and category
+     * 
+     * @param userIdentifier The user's identifier
+     * @param category The type of opportunity (scholarships, grants, jobs)
+     * @param opportunities The list of opportunities to save
+     * @throws IOException If an error occurs during database operations
+     */
+    public void saveOpportunities(String userIdentifier, String category, List&lt;String[]&gt; opportunities) throws IOException {
+<span class="nc" id="L112">        RdbSingletonFacade rdb = RdbSingletonFacade.getInstance();</span>
+<span class="nc" id="L113">        String tableName = getTableName(category);</span>
+    
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        for (String[] opportunity : opportunities) {</span>
+<span class="nc" id="L116">            ResultSet rs = null;</span>
+            try {
+                // Check if the resource already exists
+<span class="nc" id="L119">                String checkSql = &quot;SELECT COUNT(*) FROM &quot; + tableName + &quot; WHERE url = '&quot; + StringUtilities.dbSafeString(opportunity[1]) + &quot;'&quot;;</span>
+<span class="nc" id="L120">                rs = rdb.executQuery(checkSql);</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">                if (rs.next()) {</span>
+<span class="nc" id="L122">                    int count = rs.getInt(1);</span>
+<span class="nc" id="L123">                    rdb.cleanUp(rs); // Clean up the ResultSet immediately after use</span>
+<span class="nc" id="L124">                    rs = null; // Ensure rs is null for safety in finally block</span>
+    
+<span class="nc bnc" id="L126" title="All 2 branches missed.">                    if (count == 0) { // Only insert if it doesn’t exist</span>
+<span class="nc" id="L127">                        String sql = &quot;INSERT INTO &quot; + tableName + &quot; (userId, title, url, description) VALUES (&quot;;</span>
+<span class="nc" id="L128">                        sql += &quot;'&quot; + userIdentifier + &quot;',&quot;;</span>
+<span class="nc" id="L129">                        sql += &quot;'&quot; + StringUtilities.dbSafeString(opportunity[0]) + &quot;',&quot;; // title</span>
+<span class="nc" id="L130">                        sql += &quot;'&quot; + StringUtilities.dbSafeString(opportunity[1]) + &quot;',&quot;; // url</span>
+<span class="nc" id="L131">                        sql += &quot;'&quot; + StringUtilities.dbSafeString(opportunity[2]) + &quot;'&quot;;  // description</span>
+<span class="nc" id="L132">                        sql += &quot;)&quot;;</span>
+<span class="nc" id="L133">                        LOGGER.info(&quot;Inserting &quot; + category + &quot;: &quot; + sql);</span>
+<span class="nc" id="L134">                        rdb.execute(sql);</span>
+<span class="nc" id="L135">                    } else {</span>
+<span class="nc" id="L136">                        LOGGER.info(&quot;Skipping duplicate &quot; + category + &quot;: &quot; + opportunity[1]);</span>
+                    }
+<span class="nc" id="L138">                } else {</span>
+<span class="nc" id="L139">                    LOGGER.error(&quot;Failed to retrieve count for URL: &quot; + opportunity[1]);</span>
+<span class="nc" id="L140">                    rdb.cleanUp(rs); // Clean up even if rs.next() fails</span>
+<span class="nc" id="L141">                    rs = null;</span>
+                }
+<span class="nc" id="L143">            } catch (SQLException e) {</span>
+<span class="nc" id="L144">                LOGGER.error(&quot;Database error while checking/saving &quot; + category + &quot; for URL: &quot; + opportunity[1], e);</span>
+<span class="nc" id="L145">                throw new IOException(&quot;Database error while saving opportunities&quot;, e);</span>
+            } finally {
+<span class="nc bnc" id="L147" title="All 2 branches missed.">                if (rs != null) { // Only clean up if rs hasn’t been cleaned already</span>
+<span class="nc" id="L148">                    rdb.cleanUp(rs);</span>
+                }
+            }
+<span class="nc" id="L151">        }</span>
+<span class="nc" id="L152">    }</span>
+
+    /**
+     * Delete an opportunity from the specified category table based on its URL.
+     * 
+     * @param category The type of opportunity (scholarships, grants, jobs)
+     * @param url The URL of the opportunity to delete
+     * @throws IOException If a database error occurs
+     * @throws SQLException
+     */
+    public void deleteOpportunity(String category, String url) {
+<span class="nc" id="L163">        RdbSingletonFacade rdb = RdbSingletonFacade.getInstance();</span>
+<span class="nc" id="L164">        String tableName = getTableName(category);</span>
+<span class="nc" id="L165">        String sql = &quot;DELETE FROM &quot; + tableName + &quot; WHERE url = '&quot; + StringUtilities.dbSafeString(url) + &quot;'&quot;;</span>
+<span class="nc" id="L166">        LOGGER.info(&quot;Deleting &quot; + category + &quot; with URL: &quot; + url);</span>
+        try {
+<span class="nc" id="L168">            rdb.execute(sql);</span>
+<span class="nc" id="L169">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L170">            LOGGER.error(&quot;Failed to delete &quot; + category + &quot; with URL: &quot; + url, e);</span>
+<span class="nc" id="L171">            throw e; // Rethrow to let the servlet handle it</span>
+<span class="nc" id="L172">        }</span>
+<span class="nc" id="L173">    }</span>
+
+    public void saveUser(String username, String password, String role) throws IOException{
+<span class="nc" id="L176">        RdbSingletonFacade rdb = RdbSingletonFacade.getInstance();</span>
+<span class="nc" id="L177">        String sql = &quot;INSERT INTO users (username, password, role) VALUES (&quot; +</span>
+<span class="nc" id="L178">                     &quot;'&quot; + StringUtilities.dbSafeString(username) + &quot;',&quot; +</span>
+<span class="nc" id="L179">                     &quot;'&quot; + StringUtilities.dbSafeString(password) + &quot;',&quot; +</span>
+<span class="nc" id="L180">                     &quot;'&quot; + StringUtilities.dbSafeString(role) + &quot;')&quot;;</span>
+<span class="nc" id="L181">        ResultSet rs = null;</span>
+        try {
+            // Check for duplicate username
+<span class="nc" id="L184">            String checkSql = &quot;SELECT COUNT(*) FROM users WHERE username = '&quot; + StringUtilities.dbSafeString(username) + &quot;'&quot;;</span>
+<span class="nc" id="L185">            LOGGER.info(&quot;Checking for existing user: &quot; + checkSql);</span>
+<span class="nc" id="L186">            rs = rdb.executQuery(checkSql);</span>
+<span class="nc bnc" id="L187" title="All 4 branches missed.">            boolean exists = rs.next() &amp;&amp; rs.getInt(1) &gt; 0;</span>
+<span class="nc" id="L188">            rdb.cleanUp(rs); // Clean up before INSERT</span>
+<span class="nc" id="L189">            rs = null;</span>
+
+<span class="nc bnc" id="L191" title="All 2 branches missed.">            if (!exists) {</span>
+<span class="nc" id="L192">                LOGGER.info(&quot;Saving user: &quot; + username);</span>
+<span class="nc" id="L193">                rdb.execute(sql);</span>
+<span class="nc" id="L194">                LOGGER.info(&quot;User successfully inserted: &quot; + username);</span>
+            } else {
+<span class="nc" id="L196">                LOGGER.info(&quot;Username &quot; + username + &quot; already exists, skipping save&quot;);</span>
+<span class="nc" id="L197">                throw new IOException(&quot;Username already taken&quot;);</span>
+            }
+<span class="nc" id="L199">        } catch (SQLException e) {</span>
+<span class="nc" id="L200">            LOGGER.error(&quot;Database error while saving user: &quot; + username, e);</span>
+<span class="nc" id="L201">            throw new IOException(&quot;Error saving user&quot;, e);</span>
+        } finally {
+<span class="nc bnc" id="L203" title="All 2 branches missed.">            if (rs != null) {</span>
+<span class="nc" id="L204">                rdb.cleanUp(rs);</span>
+            }
+        }
+<span class="nc" id="L207">    }</span>
+
+    /**
+     * Retrieve a user from the database by username
+     * @param username The user's login name
+     * @return User object if found, null otherwise
+     * @throws IOException If a database error occurs
+     */
+    public User getUser(String username) throws IOException {
+<span class="nc" id="L216">        RdbSingletonFacade rdb = RdbSingletonFacade.getInstance();</span>
+<span class="nc" id="L217">        ResultSet rs = null;</span>
+        try {
+<span class="nc" id="L219">            String sql = &quot;SELECT userId, username, password, role FROM users WHERE username = '&quot; + StringUtilities.dbSafeString(username) + &quot;'&quot;;</span>
+<span class="nc" id="L220">            LOGGER.info(&quot;Retrieving user: &quot; + sql);</span>
+<span class="nc" id="L221">            rs = rdb.executQuery(sql);</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">            if (rs.next()) {</span>
+                // userId is an int in the database, convert to String for consistency
+<span class="nc" id="L224">                String userId = String.valueOf(rs.getInt(&quot;userId&quot;));</span>
+<span class="nc" id="L225">                return new User(userId, rs.getString(&quot;username&quot;), rs.getString(&quot;password&quot;), rs.getString(&quot;role&quot;));</span>
+            }
+<span class="nc" id="L227">            return null; // User not found</span>
+<span class="nc" id="L228">        } catch (SQLException e) {</span>
+<span class="nc" id="L229">            LOGGER.error(&quot;Database error retrieving user: &quot; + username, e);</span>
+<span class="nc" id="L230">            throw new IOException(&quot;Error retrieving user&quot;, e);</span>
+        } finally {
+<span class="nc bnc" id="L232" title="All 2 branches missed.">            if (rs != null) {</span>
+<span class="nc" id="L233">                rdb.cleanUp(rs);</span>
+            }
+        }
+    }
+
+    /**
+     * Helper method to map category to table name
+     * 
+     * @param category The opportunity category
+     * @return The corresponding table name
+     */
+    private String getTableName(String category) {
+<span class="nc bnc" id="L245" title="All 4 branches missed.">        switch (category.toLowerCase()) {</span>
+            case &quot;scholarships&quot;:
+<span class="nc" id="L247">                return &quot;scholarships&quot;;</span>
+            case &quot;grants&quot;:
+<span class="nc" id="L249">                return &quot;grants&quot;;</span>
+            case &quot;jobs&quot;:
+<span class="nc" id="L251">                return &quot;jobs&quot;;</span>
+            default:
+<span class="nc" id="L253">                throw new IllegalArgumentException(&quot;Unknown category: &quot; + category);</span>
+        }
+    }
+
+    public static class User {
+        private final String id;
+        private final String username;
+        private final String password;
+        private final String role;
+
+<span class="nc" id="L263">        public User(String id, String username, String password, String role) {</span>
+<span class="nc" id="L264">            this.id = id;</span>
+<span class="nc" id="L265">            this.username = username;</span>
+<span class="nc" id="L266">            this.password = password;</span>
+<span class="nc" id="L267">            this.role = role;</span>
+<span class="nc" id="L268">        }</span>
+
+<span class="nc" id="L270">        public String getId() { return id; }</span>
+<span class="nc" id="L271">        public String getUsername() { return username; }</span>
+<span class="nc" id="L272">        public String getPassword() { return password; }</span>
+<span class="nc" id="L273">        public String getRole() { return role; }</span>
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

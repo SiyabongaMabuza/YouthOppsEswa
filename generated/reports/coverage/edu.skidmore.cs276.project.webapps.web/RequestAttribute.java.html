@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RequestAttribute.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Project Session Coverage Report</a> &gt; <a href="index.source.html" class="el_package">edu.skidmore.cs276.project.webapps.web</a> &gt; <span class="el_source">RequestAttribute.java</span></div><h1>RequestAttribute.java</h1><pre class="source lang-java linenums">package edu.skidmore.cs276.project.webapps.web;
+
+<span class="fc" id="L3">public enum RequestAttribute {</span>
+    /**
+	 * Request attribute for the user's login id
+	 */
+<span class="fc" id="L7">	LOGIN_ID(&quot;requestAttribLoginId&quot;),</span>
+
+	
+
+	/**
+	 * Request attribute for the tasklist
+	 */
+<span class="fc" id="L14">	OPPS(&quot;requestAttribOpps&quot;),</span>
+
+    /**
+     * Request attribute for the grants list
+     */
+<span class="fc" id="L19">    GRANTS(&quot;requestAttribGrants&quot;),</span>
+
+        /**
+     * Request attribute for the scholarships list
+     */
+<span class="fc" id="L24">    SCHOLARSHIPS(&quot;requestAttribScholarships&quot;),</span>
+
+        /**
+     * Request attribute for the grants list
+     */
+<span class="fc" id="L29">    JOBS(&quot;requestAttribJobs&quot;),</span>
+
+    /**
+     * Request attribute for the grants list
+     */
+<span class="fc" id="L34">    GRANTS_COUNT(&quot;requestAttribGrantsCount&quot;),</span>
+
+        /**
+     * Request attribute for the scholarships list
+     */
+<span class="fc" id="L39">    SCHOLARSHIPS_COUNT(&quot;requestAttribScholarshipsCount&quot;),</span>
+
+        /**
+     * Request attribute for the grants list
+     */
+<span class="fc" id="L44">    JOBS_COUNT(&quot;requestAttribJobsCount&quot;),</span>
+
+<span class="fc" id="L46">	CSRF_TOKEN(&quot;csrfToken&quot;),</span>
+
+	/**
+	 * Error message for display to the user
+	 */
+<span class="fc" id="L51">	ERROR_MESSAGE(&quot;requestAttribErrorMessage&quot;);</span>
+
+	/**
+	 * The request attribute's key
+	 */
+	private String key;
+
+	/**
+	 * Set a request attribute with its key value
+	 * 
+	 * @param key The request attribute's key value
+	 */
+<span class="fc" id="L63">	private RequestAttribute(String key) {</span>
+<span class="fc" id="L64">		this.key = key;</span>
+<span class="fc" id="L65">	}</span>
+
+	/**
+	 * Get the request attribute's key value
+	 * 
+	 * @return The request attributes key value
+	 */
+	public String getKey() {
+<span class="fc" id="L73">		return key;</span>
+	}
+	
+	/**
+	 * Returns the request attribute's key value
+	 */
+	public String toString() {
+<span class="fc" id="L80">		return getKey();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

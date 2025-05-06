@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite errors="0" failures="0" hostname="cslab09.cs.skidmore.edu" name="edu.skidmore.cs276.project.webapps.web.JspInfoTest" skipped="0" tests="2" time="0.075" timestamp="2025-04-27T00:01:17">
+  <properties>
+    <property name="ant.library.dir" value="/usr/local/apache-ant-1.10.14/lib" />
+    <property name="java.specification.version" value="17" />
+    <property name="ant.project.name" value="Project1" />
+    <property name="agenDataDir" value="generated/data" />
+    <property name="sun.jnu.encoding" value="UTF-8" />
+    <property name="genJaCoCoReportsDir" value="generated/reports/coverage" />
+    <property name="sun.arch.data.model" value="64" />
+    <property name="container.manager.username" value="robot" />
+    <property name="java.vendor.url" value="https://java.oracle.com/" />
+    <property name="ant.file.type.Project1" value="file" />
+    <property name="mainJavaSrcDir" value="src/main/java" />
+    <property name="testJavaSrcDir" value="src/test/java" />
+    <property name="genSrcDir" value="generated/src" />
+    <property name="jacocoReportTitle" value="Project Session Coverage Report" />
+    <property name="DSTAMP" value="20250426" />
+    <property name="sun.boot.library.path" value="/opt/jdk-17.0.11/lib" />
+    <property name="sun.java.command" value="org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner edu.skidmore.cs276.project.webapps.web.JspInfoTest skipNonTests=false filtertrace=true haltOnError=false haltOnFailure=false formatter=org.apache.tools.ant.taskdefs.optional.junit.SummaryJUnitResultFormatter showoutput=false outputtoformatters=true logfailedtests=true threadid=0 logtestlistenerevents=false formatter=org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter,/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/generated/reports/unit-test/raw-xml/TEST-edu.skidmore.cs276.project.webapps.web.JspInfoTest.xml crashfile=/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/junitvmwatcher45667443205854157.properties propsfile=/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/junit10069469394144823393.properties" />
+    <property name="checkstyleXmlReportFile" value="CheckstyleReport.xml" />
+    <property name="jdk.debug" value="release" />
+    <property name="genCheckstyleReportsDir" value="generated/reports/checkstyle" />
+    <property name="sun.stderr.encoding" value="UTF-8" />
+    <property name="java.specification.vendor" value="Oracle Corporation" />
+    <property name="_jacoco.agentFile" value="/tmp/jacocoagent13208834901122054821.jar" />
+    <property name="java.version.date" value="2024-04-16" />
+    <property name="java.home" value="/opt/jdk-17.0.11" />
+    <property name="checkstyleJarFile" value="checkstyle-8.28-all.jar" />
+    <property name="basedir" value="/students/shared/siyamabuza/cs276-IndividualLabWork/Project1" />
+    <property name="file.separator" value="/" />
+    <property name="java.vm.compressedOopsMode" value="32-bit" />
+    <property name="line.separator" value="&#xa;" />
+    <property name="sun.stdout.encoding" value="UTF-8" />
+    <property name="java.specification.name" value="Java Platform API Specification" />
+    <property name="java.vm.specification.vendor" value="Oracle Corporation" />
+    <property name="genMainJavaSrcDir" value="generated/src/main/java" />
+    <property name="genRawUnitTestReportsDir" value="generated/reports/unit-test/raw-xml" />
+    <property name="log4j.debug" value="" />
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers" />
+    <property name="java.runtime.version" value="17.0.11+7-LTS-207" />
+    <property name="user.name" value="siyamabuza" />
+    <property name="file.encoding" value="UTF-8" />
+    <property name="java.io.tmpdir" value="/tmp" />
+    <property name="warName" value="project1" />
+    <property name="java.version" value="17.0.11" />
+    <property name="genDocsDir" value="generated/docs" />
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification" />
+    <property name="ant.home" value="/usr/local/apache-ant-1.10.14" />
+    <property name="native.encoding" value="UTF-8" />
+    <property name="ant.version" value="Apache Ant(TM) version 1.10.14 compiled on August 16 2023" />
+    <property name="java.library.path" value="/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib" />
+    <property name="java.vendor" value="Oracle Corporation" />
+    <property name="genJavadocDir" value="generated/docs/javadoc" />
+    <property name="checkstyleTextReportFile" value="CheckstyleReport.txt" />
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle" />
+    <property name="javadocPackageNames" value="edu.skidmore.*" />
+    <property name="ant.file.type" value="file" />
+    <property name="buildDir" value="src/main/webapp/WEB-INF/classes" />
+    <property name="java.class.path" value="/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/test-bin:/students/home/CS-Courses/javalib/env-lib/catalina-ant.jar:/students/home/CS-Courses/javalib/env-lib/catalina.jar:/students/home/CS-Courses/javalib/env-lib/servlet-api.jar:/students/home/CS-Courses/javalib/env-lib/taglibs-standard-impl-1.2.5.jar:/students/home/CS-Courses/javalib/test-lib/asm-7.3.1.jar:/students/home/CS-Courses/javalib/test-lib/asm-analysis-7.3.1.jar:/students/home/CS-Courses/javalib/test-lib/asm-commons-7.3.1.jar:/students/home/CS-Courses/javalib/test-lib/asm-tree-7.3.1.jar:/students/home/CS-Courses/javalib/test-lib/asm-util-7.3.1.jar:/students/home/CS-Courses/javalib/test-lib/asm-xml-6.2.1.jar:/students/home/CS-Courses/javalib/test-lib/byte-buddy-1.14.14.jar:/students/home/CS-Courses/javalib/test-lib/byte-buddy-agent-1.14.14.jar:/students/home/CS-Courses/javalib/test-lib/checkstyle-8.28-all.jar:/students/home/CS-Courses/javalib/test-lib/commons-lang3-3.3.2.jar:/students/home/CS-Courses/javalib/test-lib/hamcrest-2.2.jar:/students/home/CS-Courses/javalib/test-lib/jacocoagent.jar:/students/home/CS-Courses/javalib/test-lib/jacocoant.jar:/students/home/CS-Courses/javalib/test-lib/jacococli.jar:/students/home/CS-Courses/javalib/test-lib/jaxen-1.1.4.jar:/students/home/CS-Courses/javalib/test-lib/jetty-6.1.14.jar:/students/home/CS-Courses/javalib/test-lib/jetty-util-6.1.14.jar:/students/home/CS-Courses/javalib/test-lib/junit-4.13.jar:/students/home/CS-Courses/javalib/test-lib/logback-classic-1.0.13.jar:/students/home/CS-Courses/javalib/test-lib/logback-core-1.0.13.jar:/students/home/CS-Courses/javalib/test-lib/mockito-core-5.11.0.jar:/students/home/CS-Courses/javalib/test-lib/objenesis-3.1.jar:/students/home/CS-Courses/javalib/test-lib/org.jacoco.agent-0.8.10.202304240956.jar:/students/home/CS-Courses/javalib/test-lib/org.jacoco.ant-0.8.10.202304240956.jar:/students/home/CS-Courses/javalib/test-lib/org.jacoco.core-0.8.10.202304240956.jar:/students/home/CS-Courses/javalib/test-lib/org.jacoco.report-0.8.10.202304240956.jar:/students/home/CS-Courses/javalib/test-lib/oro-2.0.8.jar:/students/home/CS-Courses/javalib/test-lib/servlet-api-2.5-6.1.14.jar:/students/home/CS-Courses/javalib/test-lib/slf4j-api-1.7.5.jar:/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/src/main/webapp/WEB-INF/lib/commons-codec-1.18.0.jar:/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/src/main/webapp/WEB-INF/lib/commons-lang3-3.17.0.jar:/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/src/main/webapp/WEB-INF/lib/commons-validator-1.9.0.jar:/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/src/main/webapp/WEB-INF/lib/encoder-1.3.1.jar:/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/src/main/webapp/WEB-INF/lib/imaging.jar:/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/src/main/webapp/WEB-INF/lib/log4j-1.2.17.jar:/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/src/main/webapp/WEB-INF/lib/mysql-connector-j-8.3.0.jar:/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/src/main/webapp/WEB-INF/lib/simplecaptcha-dsr.jar:/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/src/main/webapp/WEB-INF/classes:/students/shared/siyamabuza/cs276-IndividualLabWork/Project1:/usr/local/apache-ant-1.10.14/lib/ant-launcher.jar:/usr/local/apache-ant-1.10.14/lib/ant.jar:/usr/local/apache-ant-1.10.14/lib/ant-junit.jar:/usr/local/apache-ant-1.10.14/lib/ant-junit4.jar" />
+    <property name="java.vm.vendor" value="Oracle Corporation" />
+    <property name="testConfigDir" value="src/test/config" />
+    <property name="envLibDir" value="env-lib" />
+    <property name="deploymentContextName" value="project1" />
+    <property name="genDir" value="generated" />
+    <property name="os.name" value="Linux" />
+    <property name="java.vm.specification.version" value="17" />
+    <property name="testLibDir" value="test-lib" />
+    <property name="genFormattedUnitTestReportsDir" value="generated/reports/unit-test/formatted" />
+    <property name="user.country" value="US" />
+    <property name="sun.java.launcher" value="SUN_STANDARD" />
+    <property name="distDir" value="dist" />
+    <property name="sourceVersion" value="17" />
+    <property name="sun.cpu.endian" value="little" />
+    <property name="user.home" value="/students/home/siyamabuza" />
+    <property name="user.language" value="en" />
+    <property name="webappDir" value="src/main/webapp" />
+    <property name="genReportsDir" value="generated/reports" />
+    <property name="rootLibDir" value="/students/home/CS-Courses/javalib" />
+    <property name="ant.java.version" value="17" />
+    <property name="ant.file.Project1" value="/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/build.xml" />
+    <property name="Library" value="root folder - contains JARs needed at both compile and runtime that will not be provided by the environment..." />
+    <property name="projectName" value="Project1" />
+    <property name="testBuildDir" value="test-bin" />
+    <property name="container.manager.password" value="2001Mabuza2001" />
+    <property name="genUnitTestReportsDir" value="generated/reports/unit-test" />
+    <property name="TSTAMP" value="2001" />
+    <property name="mainLibDir" value="src/main/webapp/WEB-INF/lib" />
+    <property name="jacocoJarFile" value="jacocoant.jar" />
+    <property name="mainConfigDir" value="src/main/config" />
+    <property name="ant.file" value="/students/shared/siyamabuza/cs276-IndividualLabWork/Project1/build.xml" />
+    <property name="path.separator" value=":" />
+    <property name="os.version" value="5.14.0-503.21.1.el9_5.x86_64" />
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment" />
+    <property name="jacocoDataFileName" value="jacoco.exec" />
+    <property name="ant.project.invoked-targets" value="test" />
+    <property name="checkstyleSuppressionsConfigFile" value="config/DsrCheckStyleSuppressionsConfig.xml" />
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM" />
+    <property name="genJaCoCoDataFileDir" value="generated/data/jacoco" />
+    <property name="ant.core.lib" value="/usr/local/apache-ant-1.10.14/lib/ant.jar" />
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/" />
+    <property name="TODAY" value="April 26 2025" />
+    <property name="container.manager.url" value="http://141.222.36.194:36288/manager/text" />
+    <property name="user.dir" value="/students/shared/siyamabuza/cs276-IndividualLabWork/Project1" />
+    <property name="os.arch" value="amd64" />
+    <property name="checkstyleConfigFile" value="config/DsrCheckStyleConfig.xml" />
+    <property name="java.vm.info" value="mixed mode, sharing" />
+    <property name="java.vm.version" value="17.0.11+7-LTS-207" />
+    <property name="java.class.version" value="61.0" />
+    <property name="ant.project.default-target" value="dist" />
+  </properties>
+  <testcase classname="edu.skidmore.cs276.project.webapps.web.JspInfoTest" name="testToString" time="0.005" />
+  <testcase classname="edu.skidmore.cs276.project.webapps.web.JspInfoTest" name="testGetJspPath" time="0.0" />
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

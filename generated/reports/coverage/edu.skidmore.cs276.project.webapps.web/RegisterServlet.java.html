@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterServlet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Project Session Coverage Report</a> &gt; <a href="index.source.html" class="el_package">edu.skidmore.cs276.project.webapps.web</a> &gt; <span class="el_source">RegisterServlet.java</span></div><h1>RegisterServlet.java</h1><pre class="source lang-java linenums">package edu.skidmore.cs276.project.webapps.web;
+
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
+import edu.skidmore.cs276.project.fileio.OpportunitiesPersistence;
+
+import java.io.IOException;
+
+public class RegisterServlet extends HttpServlet {
+    private static final long serialVersionUID = 19620501L;
+    private static final String VERSION = &quot;01.00.00&quot;;
+<span class="nc" id="L16">    private static final Logger LOGGER = Logger.getLogger(RegisterServlet.class);</span>
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+<span class="nc" id="L20">        super.init(config);</span>
+<span class="nc" id="L21">        LOGGER.warn(&quot;Servlet init. Version: &quot; + VERSION);</span>
+<span class="nc" id="L22">    }</span>
+
+<span class="nc" id="L24">    public RegisterServlet() {</span>
+<span class="nc" id="L25">    }</span>
+
+    @Override
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+<span class="nc" id="L29">        controller(req, resp);</span>
+<span class="nc" id="L30">    }</span>
+
+    @Override
+    public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+<span class="nc" id="L34">        controller(req, resp);</span>
+<span class="nc" id="L35">    }</span>
+
+    private void controller(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String forwardingPath;
+<span class="nc" id="L39">        LOGGER.info(&quot;Request method: &quot; + req.getMethod());</span>
+
+        // Generate or reuse CSRF token
+<span class="nc" id="L42">        String csrfToken = (String) req.getSession().getAttribute(&quot;CSRF&quot;);</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (csrfToken == null) {</span>
+<span class="nc" id="L44">            csrfToken = SecurityUtilities.randomString(30);</span>
+<span class="nc" id="L45">            req.getSession().setAttribute(&quot;CSRF&quot;, csrfToken);</span>
+        }
+<span class="nc" id="L47">        req.setAttribute(&quot;csrfToken&quot;, csrfToken);</span>
+<span class="nc" id="L48">        LOGGER.info(&quot;Set CSRF token: &quot; + csrfToken);</span>
+
+        // Prevent logged-in users from accessing registration
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (req.getSession().getAttribute(SessionAttribute.USER.getKey()) != null) {</span>
+<span class="nc" id="L52">            LOGGER.info(&quot;Logged-in user attempted to access registration, redirecting to opportunities&quot;);</span>
+<span class="nc" id="L53">            resp.sendRedirect(req.getContextPath() + ControllerInfo.OPPORTUNITIES_VIEW.getMappedPath());</span>
+<span class="nc" id="L54">            return;</span>
+        }
+
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (&quot;GET&quot;.equalsIgnoreCase(req.getMethod())) {</span>
+<span class="nc" id="L58">            LOGGER.info(&quot;Rendering registration page&quot;);</span>
+<span class="nc" id="L59">            forwardingPath = JspInfo.REGISTER.getJspPath();</span>
+        } else {
+            // Handle POST (registration form submission)
+<span class="nc bnc" id="L62" title="All 2 branches missed.">            if (!validateCsrfToken(req)) {</span>
+<span class="nc" id="L63">                LOGGER.warn(&quot;CSRF validation failed for registration&quot;);</span>
+<span class="nc" id="L64">                req.setAttribute(&quot;errorMessage&quot;, &quot;Invalid CSRF token&quot;);</span>
+<span class="nc" id="L65">                forwardingPath = JspInfo.REGISTER.getJspPath();</span>
+            } else {
+<span class="nc" id="L67">                String username = StringUtilities.noNull(req.getParameter(RequestParameter.USERNAME.getKey()));</span>
+<span class="nc" id="L68">                String password = StringUtilities.noNull(req.getParameter(RequestParameter.LOGIN_PASSWORD.getKey()));</span>
+<span class="nc" id="L69">                String role = StringUtilities.noNull(req.getParameter(&quot;role&quot;));</span>
+
+<span class="nc" id="L71">                LOGGER.info(&quot;Attempting to register user: &quot; + username + &quot; with role: &quot; + role);</span>
+
+<span class="nc bnc" id="L73" title="All 6 branches missed.">                if (username.isEmpty() || password.isEmpty() || role.isEmpty()) {</span>
+<span class="nc" id="L74">                    LOGGER.warn(&quot;Registration failed: All fields are required&quot;);</span>
+<span class="nc" id="L75">                    req.setAttribute(&quot;errorMessage&quot;, &quot;All fields are required&quot;);</span>
+<span class="nc" id="L76">                    forwardingPath = JspInfo.REGISTER.getJspPath();</span>
+                } else {
+<span class="nc" id="L78">                    OpportunitiesPersistence persistence = OpportunitiesPersistence.getInstance();</span>
+                    try {
+                        // Check if username already exists
+<span class="nc" id="L81">                        OpportunitiesPersistence.User existingUser = persistence.getUser(username);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">                        if (existingUser != null) {</span>
+<span class="nc" id="L83">                            LOGGER.warn(&quot;Registration failed: Username already taken: &quot; + username);</span>
+<span class="nc" id="L84">                            req.setAttribute(&quot;errorMessage&quot;, &quot;Username already taken&quot;);</span>
+<span class="nc" id="L85">                            forwardingPath = JspInfo.REGISTER.getJspPath();</span>
+                        } else {
+                            // Save new user
+<span class="nc" id="L88">                            persistence.saveUser(username, password, role);</span>
+<span class="nc" id="L89">                            LOGGER.info(&quot;Successfully registered new user: &quot; + username + &quot; with role: &quot; + role);</span>
+<span class="nc" id="L90">                            req.setAttribute(&quot;successMessage&quot;, &quot;Registration successful! Please log in.&quot;);</span>
+<span class="nc" id="L91">                            forwardingPath = JspInfo.LOGIN.getJspPath();</span>
+                        }
+<span class="nc" id="L93">                    } catch (IOException e) {</span>
+<span class="nc bnc" id="L94" title="All 4 branches missed.">                        String errorMsg = e.getMessage() != null &amp;&amp; e.getMessage().equals(&quot;Username already taken&quot;)</span>
+<span class="nc" id="L95">                            ? &quot;Username already taken&quot;</span>
+<span class="nc" id="L96">                            : &quot;Registration failed due to a server error: &quot; + e.getMessage();</span>
+<span class="nc" id="L97">                        LOGGER.error(&quot;Error saving new user: &quot; + username + &quot; - &quot; + errorMsg, e);</span>
+<span class="nc" id="L98">                        req.setAttribute(&quot;errorMessage&quot;, errorMsg);</span>
+<span class="nc" id="L99">                        forwardingPath = JspInfo.REGISTER.getJspPath();</span>
+<span class="nc" id="L100">                    }</span>
+                }
+            }
+        }
+
+<span class="nc" id="L105">        req.getRequestDispatcher(forwardingPath).forward(req, resp);</span>
+<span class="nc" id="L106">    }</span>
+
+    private boolean validateCsrfToken(HttpServletRequest req) {
+<span class="nc" id="L109">        String sessionToken = (String) req.getSession().getAttribute(&quot;CSRF&quot;);</span>
+<span class="nc" id="L110">        String requestToken = req.getParameter(RequestParameter.CSRF_TOKEN.getKey());</span>
+<span class="nc" id="L111">        LOGGER.info(&quot;CSRF validation - Session token: &quot; + sessionToken + &quot;, Request token: &quot; + requestToken);</span>
+<span class="nc bnc" id="L112" title="All 6 branches missed.">        return sessionToken != null &amp;&amp; requestToken != null &amp;&amp; sessionToken.equals(requestToken);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
