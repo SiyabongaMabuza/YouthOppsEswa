@@ -1,5 +1,3 @@
-# CS276 Student Project
-
 ## Siyabonga Mabuza
 
 ##Project Overview and Notes
