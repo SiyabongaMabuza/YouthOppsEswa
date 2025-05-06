@@ -1,0 +1,26 @@
+# Sensitive configuration files
+web.xml
+build.properties
+context.xml
+application.properties
+*.env
+*.key
+*.pem
+
+# Build and output files
+/target/
+/build/
+*.class
+*.jar
+*.war
+
+# IDE and editor files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Logs and caches
+*.log
+/logs/
+/.cache/
